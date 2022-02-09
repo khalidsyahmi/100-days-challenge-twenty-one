@@ -7,7 +7,10 @@ const csrf = require("csurf");
 const db = require("./data/database");
 const blogRoutes = require("./routes/blog");
 const authRoutes = require("./routes/auth");
-const sessionRoutes = require("./config/sessions");
+const sessionConfig = require("./config/sessions"); //new name because separate function
+//custom middlewares
+const authMW = require("./middleware/auth-mw");
+const csrfMW = require('./middleware/csrf-token-mw')
 
 const app = express();
 
@@ -17,33 +20,18 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
-app.use(sessionRoutes);
+const mongodbSessionStore = sessionConfig.sessionKey(session);
 
-app.use(
-  session({
-    secret: "super-secret",
-    resave: false,
-    saveUninitialized: false,
-    store: sessionStore,
-    cookie: {
-      maxAge: 2 * 24 * 60 * 60 * 1000,
-    },
-  })
-);
+//sessionConfig with nameKey
+//mongodbSessionStore as argument
+//refactored session
+app.use(session(sessionConfig.headerKey(mongodbSessionStore)));
+//csrf function after session creation
 app.use(csrf());
 
-app.use(async function (req, res, next) {
-  const user = req.session.user;
-  const isAuth = req.session.isAuthenticated;
-
-  if (!user || !isAuth) {
-    return next();
-  }
-
-  res.locals.isAuth = isAuth;
-
-  next();
-});
+//auth mw
+app.use(authMW);
+app.use(csrfMW);
 
 app.use(authRoutes);
 app.use(blogRoutes);

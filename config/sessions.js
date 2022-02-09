@@ -1,6 +1,7 @@
 const mongodbStore = require("connect-mongodb-session");
 
-function sessionStore(session) {
+//store function
+function createSessionStore(session) { // session parameter //the package in app.js
   const MongoDBStore = mongodbStore(session);
 
   const sessionStore = new MongoDBStore({
@@ -9,9 +10,29 @@ function sessionStore(session) {
     collection: "sessions",
   });
 
-  sessionStore;
+  return sessionStore;
+}
+
+//function session attach metadata
+function createSessionHeader(sessionStore){ //store parameter
+  return{
+      secret: "super-secret",
+      resave: false,
+      saveUninitialized: false,
+      store: sessionStore,
+      cookie: {
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+      },
+  }
 }
 
 module.exports = {
-  sessionKey: session,
+  sessionKey: createSessionStore,
+  headerKey: createSessionHeader
 };
+
+
+
+
+
+
