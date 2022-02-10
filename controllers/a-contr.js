@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const validationSession = require("../util/validation-session-util");
 const validation = require('../util/validation-logic');
+const res = require('express/lib/response');
 
 function getSignUp(req, res) {
     //session-validation
@@ -192,10 +193,15 @@ function logOut(req, res) {
     res.redirect("/");
 }
 
+function display401(req, res) {
+    res.status(401).render('401');
+}
+
 module.exports = {
     getSignUpK: getSignUp,
     getSignInK: getSignIn,
     createAccountK: createAccount,
     logOnK: logOn,
-    logOutK: logOut
+    logOutK: logOut,
+    display401K: display401
 }

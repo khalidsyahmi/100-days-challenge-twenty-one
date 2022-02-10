@@ -8,9 +8,7 @@ function getHome(req, res) {
 }
 
 async function getAdmin(req, res) {
-    if (!res.locals.isAuth) {
-        return res.status(401).render("401");
-    }
+    //redacted 401
 
     //cut for Post class 
     //no instantiation necessary
@@ -53,11 +51,17 @@ async function createPost(req, res) {
 
     res.redirect("/admin");
 }
-
-async function fetchOnePost(req, res) {
+//next mw
+async function fetchOnePost(req, res, next) {
     //const postId = new ObjectId(req.params.id);
     //cut for Post class 
-    const post = new Post(null, null, req.params.id);
+    //try
+    let post;
+    try {
+        post = new Post(null, null, req.params.id);
+    } catch (err) {
+        return next(err);
+    }
     await post.fetch();
 
     if (!post.title || !post.content) { //
